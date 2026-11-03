@@ -98,8 +98,11 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 .tabs{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-bottom:1px solid var(--line);margin:0 0 12px}
 .tabs button{border:0;background:none;padding:11px 0;font:600 15px var(--sans);color:var(--muted);cursor:pointer}
 .tabs button[aria-selected=true]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--navy)}
-.facts{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;margin:0 0 10px;font-size:15px}
-.facts dt{color:var(--muted)}.facts dd{margin:0}
+.facts{width:100%;border:1px solid var(--line);border-radius:12px;border-collapse:separate;border-spacing:0;overflow:hidden;margin:0 0 14px;font-size:15px}
+.facts th,.facts td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+.facts tr:first-child th,.facts tr:first-child td{border-top:0}
+.facts th{text-align:left;font-weight:400;color:var(--muted);white-space:nowrap}
+.facts td{text-align:right;font-weight:600}
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pgrid a{display:block;color:var(--muted)!important;font-weight:400!important;text-decoration:none}
 .pgrid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--line)}
@@ -218,7 +221,7 @@ async function googleMap(){
   const map = new GMap(document.getElementById("map"),{
     center:CENTER, zoom:16, mapId:CFG.mapId, colorScheme:"FOLLOW_SYSTEM",
     disableDefaultUI:true, clickableIcons:false, gestureHandling:"greedy",
-    keyboardShortcuts:true, maxZoom:21, tilt:0, mapTypeId:satOn?"hybrid":"roadmap"
+    keyboardShortcuts:false, maxZoom:21, tilt:0, mapTypeId:satOn?"hybrid":"roadmap"
   });
   // AdvancedMarker anchors content bottom-center; shift so the dot's center sits on the point
   const centered = el => {const w=document.createElement("div");w.style.transform="translateY(50%)";w.append(el);return w};
@@ -429,12 +432,12 @@ function renderDetail(t){
     </div>
     <div role="tabpanel" data-pane="about">
       ${t.img?`<a href="${IMG}${encodeURIComponent(t.img)}" target="_blank" rel="noopener"><img class="hero" src="${IMG}${encodeURIComponent(t.img)}" alt="${esc(t.name)}"></a>`:""}
-      <dl class="facts">
-        ${ty.family?`<dt>Family</dt><dd>${esc(ty.family)}</dd>`:""}
-        <dt>Scientific name</dt><dd><i>${esc(t.sci)}</i></dd>
-        ${ty.cultivar?`<dt>Cultivar</dt><dd>${esc(ty.cultivar)}</dd>`:""}
-        <dt>On campus</dt><dd>${plantedHere} ${plantedHere===1?"tree":"trees"}</dd>
-      </dl>
+      <table class="facts"><tbody>
+        ${ty.family?`<tr><th scope="row">Family</th><td>${esc(ty.family)}</td></tr>`:""}
+        <tr><th scope="row">On campus</th><td>${plantedHere} ${plantedHere===1?"tree":"trees"}</td></tr>
+        <tr><th scope="row">Scientific name</th><td><i>${esc(t.sci)}</i></td></tr>
+        ${ty.cultivar?`<tr><th scope="row">Cultivar</th><td>${esc(ty.cultivar)}</td></tr>`:""}
+      </tbody></table>
       <p>${esc(ty.description||"")}</p>
       <p class="meta"><a href="${dirURL(t)}" target="_blank" rel="noopener">Walking directions</a></p>
       <p class="meta"><a href="${SITE}/trees/${t.type}" target="_blank" rel="noopener">Care notes on BYU Tree Tours</a></p>
