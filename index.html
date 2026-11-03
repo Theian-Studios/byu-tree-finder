@@ -27,7 +27,11 @@
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden;-webkit-tap-highlight-color:transparent}
-#map{position:fixed!important;left:0;right:0;top:0;bottom:var(--mapB,130px);z-index:0}
+/* the map runs 20px under the sheet so its rounded corners show map, not a gap;
+   Google's logo and attribution are lifted by the same amount so they stay visible */
+:root{--under:20px}
+#map{position:fixed!important;left:0;right:0;top:0;bottom:calc(var(--mapB,130px) - var(--under));z-index:0}
+#map .gm-style>div>div[style*="bottom: 0px"][style*="z-index: 1000000"],#map .gm-style>div>div[style*="bottom: 0px"][style*="inline-flex"],#map .leaflet-bottom{bottom:var(--under)!important}
 @media (prefers-color-scheme:dark){body{background:#242f3e}}
 .leaflet-container{background:#dfe6dc;font-family:var(--sans)}
 
@@ -86,7 +90,7 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 .rowwrap{display:flex;align-items:center;border-top:1px solid var(--line)}
 .rowwrap .row{border-top:0;flex:1;min-width:0}
 .go{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--muted);border-radius:50%}
-.row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;width:100%;padding:9px 0;border:0;border-top:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;padding:9px 0;border:0;border-top:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .row b{font:600 16px var(--serif)}
 .row i{display:block;font:italic 13px var(--serif);color:var(--muted)}
 .row .d{font:600 15px var(--sans);font-variant-numeric:tabular-nums;color:var(--muted)}
@@ -112,7 +116,7 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 @media (prefers-color-scheme:dark){.err{background:#3A2A12;color:#F5D7A8}}
 
 /* markers */
-.tmark{width:16px;height:16px;border-radius:50%;background:var(--leaf);border:2.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);transition:transform .2s}
+.tmark{width:22px;height:22px;border-radius:50%;background:var(--leaf);border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);transition:transform .2s}
 .tmark.target{background:var(--near);transform:scale(1.45)}
 .tmark.dim{opacity:.35}
 .mewrap{position:relative;width:22px;height:22px}
@@ -224,7 +228,7 @@ async function googleMap(){
     keyboardShortcuts:false, maxZoom:21, tilt:0, mapTypeId:satOn?"hybrid":"roadmap"
   });
   // AdvancedMarker anchors content bottom-center; shift so the dot's center sits on the point
-  const centered = el => {const w=document.createElement("div");w.style.transform="translateY(50%)";w.append(el);return w};
+  const centered = (el,pad=0) => {const w=document.createElement("div");w.style.transform="translateY(50%)";if(pad)w.style.padding=pad+"px";w.append(el);return w};
   let meM=null, acc=null;
   return {
     kind:"google",
@@ -233,7 +237,7 @@ async function googleMap(){
     sat(on){ map.setMapTypeId(on?"hybrid":"roadmap") },
     addTree(t,onTap){
       const dot=treeDot();
-      const m=new AM({map,position:{lat:t.lat,lng:t.lng},content:centered(dot),title:t.name,gmpClickable:true});
+      const m=new AM({map,position:{lat:t.lat,lng:t.lng},content:centered(dot,11),title:t.name,gmpClickable:true});   // 11px padding = ~44px tap target
       m.addEventListener("gmp-click",onTap);
       return dot;
     },
@@ -264,9 +268,9 @@ async function leafletMap(){
     onUserDrag(fn){ map.on("dragstart",fn) },
     sat(on){ map.removeLayer(on?street:sat); (on?sat:street).addTo(map) },
     addTree(t,onTap){
-      const m=L.marker([t.lat,t.lng],{icon:L.divIcon({className:"",html:'<div class="tmark"></div>',iconSize:[16,16],iconAnchor:[8,8]}),title:t.name,keyboard:true}).addTo(map);
+      const m=L.marker([t.lat,t.lng],{icon:L.divIcon({className:"",html:'<div style="padding:11px"><div class="tmark"></div></div>',iconSize:[44,44],iconAnchor:[22,22]}),title:t.name,keyboard:true}).addTo(map);
       m.on("click",onTap);
-      return m.getElement().firstChild;
+      return m.getElement().firstChild.firstChild;
     },
     setMe(p){
       if(!meM){
@@ -406,8 +410,7 @@ function update(light){
   document.getElementById("dist").innerHTML = here ? "" : `${n}<span>${u} away</span>`;
   document.getElementById("dial").classList.toggle("here",here);
   setText(t);
-  document.getElementById("status").textContent = here ? "" :
-    (me.acc>15?"Weak GPS signal, distance may be off":"");
+  document.getElementById("status").textContent = "";
   document.getElementById("badge").innerHTML = here ? '<span class="hereBadge">You’re at this tree</span>' : "";
   if(here && !arrived.has(t.id)){arrived.add(t.id); say("You’re at the "+t.name+"."); if(ARRIVE_BUZZ&&navigator.vibrate) navigator.vibrate([80,60,80])}
   restyleMarkers();
@@ -479,7 +482,6 @@ function renderList(){
   if(me){arr.forEach(t=>{t._d=dist(me,t);t._b=bearing(me,t)});arr.sort((a,b)=>a._d-b._d);arr=arr.slice(0,5);document.getElementById("nearTitle").textContent="Closest to you"}
   else arr.sort((a,b)=>a.name.localeCompare(b.name));
   list.innerHTML=arr.map(t=>`<div class="rowwrap"><button class="row" data-id="${t.id}">
-    <svg width="24" height="24" viewBox="0 0 24 24" style="transform:rotate(${me?((t._b-(heading||0)+360)%360):0}deg)"><path d="${me?"M12 3 18 19 12 15 6 19Z":"M12 2c4 3 6 6 6 9a6 6 0 0 1-12 0c0-3 2-6 6-9Zm0 13v7"}" fill="${me?"currentColor":"none"}" stroke="currentColor" stroke-width="${me?0:2}"/></svg>
     <span><b>${esc(t.name)}</b><i>${esc(t.sci)}</i></span>
     <span class="d">${me?fmt(t._d).join(" "):""}</span></button>
     <a class="go" href="${dirURL(t)}" target="_blank" rel="noopener" aria-label="Walking directions to ${esc(t.name)}" title="Directions"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg></a></div>`).join("");
