@@ -65,13 +65,12 @@ body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden
 .tname{font:700 19px/1.2 var(--serif);margin-top:4px}
 .sci{font:italic 400 14px var(--serif);color:var(--muted)}
 .status{font-size:14px;color:var(--muted);margin-top:2px}
+.status:empty{display:none}
 .hereBadge{display:inline-block;margin-top:6px;font:600 13px var(--sans);color:#fff;background:#3E7D3A;padding:3px 10px;border-radius:12px}
 .actions{flex:none;display:flex;gap:8px;margin-top:12px}
 .btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .btn.primary{background:var(--btn);border-color:var(--btn);color:var(--btn-ink)}
-.btn[aria-pressed=true]{background:var(--leaf-soft);border-color:var(--leaf);color:var(--ink)}
-.btn[aria-pressed=true]::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--me);margin-right:7px;vertical-align:1px}
 .more{overflow:auto;margin-top:12px;display:none;-webkit-overflow-scrolling:touch}
 .sheet.open .more{display:block}
 .near h3,.detail h3{font:600 13px var(--sans);color:var(--muted);margin:4px 0 6px}
@@ -139,7 +138,6 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
   </button>
   <div class="actions" id="actions">
     <button class="btn primary" id="locBtn">Use my location</button>
-    <button class="btn" id="followBtn" hidden aria-pressed="false">Follow me</button>
     <button class="btn" id="nearestBtn" hidden>Nearest</button>
     <a class="btn" id="dirBtn" hidden target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg>Directions</a>
   </div>
@@ -264,7 +262,7 @@ async function leafletMap(){
 }
 
 function wireMap(){
-  mv.onUserDrag(()=>{if(follow)setFollow(false)});
+  mv.onUserDrag(()=>setFollow(false));
   treeEls.clear();
   trees.forEach(t=>treeEls.set(t.id, mv.addTree(t,()=>choose(t,true))));
   if(me) mv.setMe(me);
@@ -316,7 +314,6 @@ function startLocation(){
     showErr(msg);
   },{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
   document.getElementById("locBtn").hidden=true;
-  document.getElementById("followBtn").hidden=false;
   document.getElementById("nearestBtn").hidden=false;
   setFollow(true);
 }
@@ -331,10 +328,11 @@ function onPos(p){
   update(); renderList();
 }
 function nearest(){let best=null,bd=Infinity;for(const t of trees){const d=dist(me,t);if(d<bd){bd=d;best=t}}return best}
-function setFollow(on){follow=on;const b=document.getElementById("followBtn");b.setAttribute("aria-pressed",on);b.textContent=on?"Following":"Follow me";if(on&&me&&mv)mv.setView(me.lat,me.lng,18)}
+// Follow is automatic. Panning the map or picking a tree pauses it; it picks back up after 15 s.
+let resumeT=0;
+function setFollow(on){follow=on;clearTimeout(resumeT);if(on){if(me&&mv)mv.setView(me.lat,me.lng,18)}else if(me)resumeT=setTimeout(()=>setFollow(true),15000)}
 document.getElementById("locBtn").onclick=startLocation;
-document.getElementById("followBtn").onclick=()=>setFollow(!follow);
-document.getElementById("nearestBtn").onclick=()=>{manualTarget=false;if(me){target=nearest();update();renderList();flyTo(target)}};
+document.getElementById("nearestBtn").onclick=()=>{manualTarget=false;if(me){target=nearest();update();renderList();setFollow(true)}};
 
 /* ---------- compass ---------- */
 function askCompass(){
@@ -390,7 +388,7 @@ function update(light){
   document.getElementById("dial").classList.toggle("here",here);
   setText(t);
   document.getElementById("status").textContent = here ? "" :
-    cardinal(b)+" of you"+(me.acc>15?" · weak GPS, distance may be off":"");
+    (me.acc>15?"Weak GPS signal, distance may be off":"");
   document.getElementById("badge").innerHTML = here ? '<span class="hereBadge">You’re at this tree</span>' : "";
   if(here && !arrived.has(t.id)){arrived.add(t.id); say("You’re at the "+t.name+"."); if(ARRIVE_BUZZ&&navigator.vibrate) navigator.vibrate([80,60,80])}
   restyleMarkers();
@@ -399,7 +397,7 @@ let lastSaid="";function say(s){if(s===lastSaid)return;lastSaid=s;document.getEl
 function setText(t){if(document.getElementById("tname").textContent!==t.name)say(t.name);document.getElementById("tname").textContent=t.name;document.getElementById("sci").textContent=t.sci}
 function choose(t,manual){
   target=t;manualTarget=manual;update();renderDetail(t);restyleMarkers();
-  if(manual&&follow)setFollow(false);
+  if(manual)setFollow(false);
 }
 function flyTo(t){mv&&mv.setView(t.lat,t.lng,18)}
 function renderDetail(t){
