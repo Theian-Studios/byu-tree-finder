@@ -62,8 +62,7 @@ body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden
 #sheet.nofix .dial,#sheet.nofix .dist{display:none}
 #sheet.nofix .compass{grid-template-columns:1fr}
 .dial.here{border-color:var(--leaf);background:var(--leaf-soft)}
-.dial img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);border-radius:50%;object-fit:contain;display:none}
-.dial.photo::before{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ph) center/cover;filter:blur(5px) saturate(.9);clip-path:circle(50%)}
+.dial img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);border-radius:50%;object-fit:cover;object-position:50% 40%;display:none}
 .orbit{position:absolute;inset:-3px;display:none;pointer-events:none;transition:transform .25s ease-out}
 .orbit i{position:absolute;left:50%;top:-8px;margin-left:-11px;width:0;height:0;border:11px solid transparent;border-top:0;border-bottom:17px solid var(--navy);filter:drop-shadow(0 0 1.5px var(--paper))}
 .dial.photo img,.dial.photo .orbit{display:block}
@@ -95,12 +94,17 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 .detail p{font:400 16px/1.6 var(--serif);margin:6px 0 10px}
 .detail .meta{font-size:14px;color:var(--muted)}
 .detail a{color:var(--navy);font-weight:600}
-.hero{display:block;width:100%;height:auto;max-height:440px;object-fit:contain;border-radius:10px;background:var(--line);margin:6px 0 10px}
-.strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:2px 0 10px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.strip:empty{display:none}
-.strip a{flex:none;width:112px;scroll-snap-align:start;color:var(--muted)!important;font-weight:400!important;text-decoration:none}
-.strip img{display:block;width:112px;height:150px;object-fit:cover;border-radius:8px;background:var(--line)}
-.strip span{display:block;font-size:12px;line-height:1.3;margin-top:4px}
+.hero{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:50% 35%;border-radius:10px;background:var(--line);margin:0 0 12px}
+.tabs{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-bottom:1px solid var(--line);margin:0 0 12px}
+.tabs button{border:0;background:none;padding:11px 0;font:600 15px var(--sans);color:var(--muted);cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--navy)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;margin:0 0 10px;font-size:15px}
+.facts dt{color:var(--muted)}.facts dd{margin:0}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pgrid a{display:block;color:var(--muted)!important;font-weight:400!important;text-decoration:none}
+.pgrid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--line)}
+.pgrid span{display:block;font-size:12px;line-height:1.3;margin-top:4px}
+.more[data-tab=about] .near,.more[data-tab=photos] .near{display:none}
 .err{background:#FFF3E0;color:#6B3E00;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px;display:none}
 @media (prefers-color-scheme:dark){.err{background:#3A2A12;color:#F5D7A8}}
 
@@ -390,7 +394,7 @@ function update(light){
   arrow.style.transform=`rotate(${rel}deg)`;
   document.getElementById("orbit").style.transform=`rotate(${rel}deg)`;
   {const dial=document.getElementById("dial"),di=document.getElementById("dialImg");
-   if(t.img){const src=IMG+encodeURIComponent(t.img);if(di.dataset.src!==src){di.dataset.src=src;di.src=src;dial.style.setProperty("--ph",`url("${src}")`);di.onerror=()=>dial.classList.remove("photo")}dial.classList.add("photo")}
+   if(t.img){const src=IMG+encodeURIComponent(t.img);if(di.dataset.src!==src){di.dataset.src=src;di.src=src;di.onerror=()=>dial.classList.remove("photo")}dial.classList.add("photo")}
    else dial.classList.remove("photo");}
   document.getElementById("cardinal").textContent = heading==null ? "N" : "";
   if(light) return;
@@ -416,16 +420,36 @@ function renderDetail(t){
   const ty=types[t.type]||{};
   const plantedHere = trees.filter(x=>x.type===t.type).length;
   detailFor=t.id;
+  const main = t.img?`<a href="${IMG}${encodeURIComponent(t.img)}" target="_blank" rel="noopener"><img src="${IMG}${encodeURIComponent(t.img)}" alt="${esc(t.name)}"></a>`:"";
   document.getElementById("detail").innerHTML = `
-    <h3>About this tree</h3>
-    ${t.img?`<a href="${IMG}${encodeURIComponent(t.img)}" target="_blank" rel="noopener"><img class="hero" src="${IMG}${encodeURIComponent(t.img)}" alt="${esc(t.name)}"></a>`:""}
-    <div class="meta">${esc(ty.family||"")}${ty.cultivar?" · cultivar "+esc(ty.cultivar):""}${plantedHere>1?` · ${plantedHere} on campus`:""}</div>
-    <p>${esc(ty.description||"")}</p>
-    <div class="strip" id="strip" aria-label="More photos"></div>
-    <p class="meta"><a href="${dirURL(t)}" target="_blank" rel="noopener">Walking directions</a></p>
-    <p class="meta"><a href="${SITE}/trees/${t.type}" target="_blank" rel="noopener">Care notes on BYU Tree Tours</a></p>`;
+    <div class="tabs" role="tablist" aria-label="Tree details">
+      <button role="tab" data-tab="about" aria-selected="true">About</button>
+      <button role="tab" data-tab="photos" aria-selected="false">Photos</button>
+      <button role="tab" data-tab="nearby" aria-selected="false">Nearby</button>
+    </div>
+    <div role="tabpanel" data-pane="about">
+      ${t.img?`<a href="${IMG}${encodeURIComponent(t.img)}" target="_blank" rel="noopener"><img class="hero" src="${IMG}${encodeURIComponent(t.img)}" alt="${esc(t.name)}"></a>`:""}
+      <dl class="facts">
+        ${ty.family?`<dt>Family</dt><dd>${esc(ty.family)}</dd>`:""}
+        <dt>Scientific name</dt><dd><i>${esc(t.sci)}</i></dd>
+        ${ty.cultivar?`<dt>Cultivar</dt><dd>${esc(ty.cultivar)}</dd>`:""}
+        <dt>On campus</dt><dd>${plantedHere} ${plantedHere===1?"tree":"trees"}</dd>
+      </dl>
+      <p>${esc(ty.description||"")}</p>
+      <p class="meta"><a href="${dirURL(t)}" target="_blank" rel="noopener">Walking directions</a></p>
+      <p class="meta"><a href="${SITE}/trees/${t.type}" target="_blank" rel="noopener">Care notes on BYU Tree Tours</a></p>
+    </div>
+    <div role="tabpanel" data-pane="photos" hidden><div class="pgrid">${main}<div id="strip" style="display:contents"></div></div></div>`;
+  showTab("about");
   loadPhotos(t);
 }
+function showTab(name){
+  const more=document.getElementById("more"); more.dataset.tab=name;
+  document.querySelectorAll("#detail [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name));
+  document.querySelectorAll("#detail [data-pane]").forEach(p=>p.hidden=p.dataset.pane!==name);
+  more.scrollTop=0;
+}
+document.getElementById("detail").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)showTab(b.dataset.tab)});
 let detailFor=null; const photoCache=new Map();
 async function loadPhotos(t){
   let list=photoCache.get(t.id);
@@ -466,7 +490,7 @@ let sheetY=0, dragging=null, eatClick=false, countFor=null;
 const isOpen=()=>sheet.classList.contains("open");
 function moreLabel(){
   const n=target?(target.img?1:0)+((photoCache.get(target.id)||[]).length):0;
-  document.getElementById("moreLabel").textContent=isOpen()?"Hide details":"Photos and details"+(n?" · "+n+" photo"+(n===1?"":"s"):"");
+  document.getElementById("moreLabel").textContent=isOpen()?"Hide details":"Photos and details";
 }
 // how far down the sheet slides when collapsed: everything except the top part stays off screen
 function closedY(){const pb=parseFloat(getComputedStyle(sheet).paddingBottom)||0;return Math.max(0,sheet.offsetHeight-sheetTop.offsetHeight-pb)}
