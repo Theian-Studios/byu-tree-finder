@@ -62,20 +62,22 @@ body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden
 #sheet.nofix .dial,#sheet.nofix .dist{display:none}
 #sheet.nofix .compass{grid-template-columns:1fr}
 .dial.here{border-color:var(--leaf);background:var(--leaf-soft)}
-.dial img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);border-radius:50%;object-fit:cover;display:none}
+.dial img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);border-radius:50%;object-fit:contain;display:none}
+.dial.photo::before{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ph) center/cover;filter:blur(5px) saturate(.9);clip-path:circle(50%)}
 .orbit{position:absolute;inset:-3px;display:none;pointer-events:none;transition:transform .25s ease-out}
 .orbit i{position:absolute;left:50%;top:-8px;margin-left:-11px;width:0;height:0;border:11px solid transparent;border-top:0;border-bottom:17px solid var(--navy);filter:drop-shadow(0 0 1.5px var(--paper))}
 .dial.photo img,.dial.photo .orbit{display:block}
 .dial.photo #arrow,.dial.photo .card,.dial.here .orbit{display:none}
-.dist{font:700 34px/1 var(--serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.dist span{font:500 15px var(--sans);color:var(--muted);margin-left:4px}
-.tname{font:700 19px/1.2 var(--serif);margin-top:4px}
-.sci{font:italic 400 14px var(--serif);color:var(--muted)}
+.dist{font:500 14px/1.3 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;margin-top:5px}
+.dist span{margin-left:3px}
+.dist:empty{display:none}
+.tname{font:700 23px/1.15 var(--serif)}
+.sci{font:italic 400 15px var(--serif);color:var(--muted);margin-top:2px}
 .status{font-size:14px;color:var(--muted);margin-top:2px}
 .status:empty{display:none}
 .hereBadge{display:inline-block;margin-top:6px;font:600 13px var(--sans);color:#fff;background:#3E7D3A;padding:3px 10px;border-radius:12px}
 .actions{flex:none;display:flex;gap:8px;margin-top:12px}
-.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:8px;border:0;border-radius:10px;background:var(--leaf-soft);color:var(--ink);font:600 15px var(--sans);cursor:pointer}
+.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:12px;border:0;border-radius:10px;background:var(--leaf-soft);color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 .morebtn svg{transition:transform .25s}.sheet.open .morebtn svg{transform:rotate(180deg)}
 .btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
@@ -93,11 +95,11 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 .detail p{font:400 16px/1.6 var(--serif);margin:6px 0 10px}
 .detail .meta{font-size:14px;color:var(--muted)}
 .detail a{color:var(--navy);font-weight:600}
-.hero{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--line);margin:6px 0 10px}
+.hero{display:block;width:100%;height:auto;max-height:440px;object-fit:contain;border-radius:10px;background:var(--line);margin:6px 0 10px}
 .strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:2px 0 10px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .strip:empty{display:none}
-.strip a{flex:none;width:132px;scroll-snap-align:start;color:var(--muted)!important;font-weight:400!important;text-decoration:none}
-.strip img{display:block;width:132px;height:100px;object-fit:cover;border-radius:8px;background:var(--line)}
+.strip a{flex:none;width:112px;scroll-snap-align:start;color:var(--muted)!important;font-weight:400!important;text-decoration:none}
+.strip img{display:block;width:112px;height:150px;object-fit:cover;border-radius:8px;background:var(--line)}
 .strip span{display:block;font-size:12px;line-height:1.3;margin-top:4px}
 .err{background:#FFF3E0;color:#6B3E00;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px;display:none}
 @media (prefers-color-scheme:dark){.err{background:#3A2A12;color:#F5D7A8}}
@@ -137,17 +139,15 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
       <div class="orbit" id="orbit" aria-hidden="true"><i></i></div>
     </div>
     <div>
-      <div class="dist" id="dist">–</div>
       <div class="tname" id="tname">Find trees near you</div>
       <div class="sci" id="sci"></div>
+      <div class="dist" id="dist"></div>
       <div class="status" id="status">Use your location to find the closest tree, or tap a dot on the map.</div>
       <div id="badge"></div>
     </div>
   </button>
   <div class="actions" id="actions">
     <button class="btn primary" id="locBtn">Use my location</button>
-    <button class="btn" id="nearestBtn" hidden>Nearest</button>
-    <a class="btn" id="dirBtn" hidden target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg>Directions</a>
   </div>
   <button class="morebtn" id="moreBtn" hidden aria-controls="more" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg><span id="moreLabel">Photos and details</span></button>
   <div class="err" id="err" role="alert"></div>
@@ -322,8 +322,7 @@ function startLocation(){
       : e.code===3 ? "Still looking for GPS. Step outside or away from tall buildings." : "Couldn’t get your location. Try again in a moment.";
     showErr(msg);
   },{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
-  document.getElementById("locBtn").hidden=true;
-  document.getElementById("nearestBtn").hidden=false;
+  document.getElementById("actions").hidden=true;
   setFollow(true);
 }
 function showErr(m){const e=document.getElementById("err");e.textContent=m;e.style.display="block"}
@@ -341,7 +340,6 @@ function nearest(){let best=null,bd=Infinity;for(const t of trees){const d=dist(
 let resumeT=0;
 function setFollow(on){follow=on;clearTimeout(resumeT);if(on){if(me&&mv)mv.setView(me.lat,me.lng,18)}else if(me)resumeT=setTimeout(()=>setFollow(true),15000)}
 document.getElementById("locBtn").onclick=startLocation;
-document.getElementById("nearestBtn").onclick=()=>{manualTarget=false;if(me){target=nearest();update();renderList();setFollow(true)}};
 
 /* ---------- compass ---------- */
 function askCompass(){
@@ -378,11 +376,9 @@ function update(light){
   if(cone&&heading!=null){cone.style.display="block";cone.style.transform=`rotate(${heading}deg)`}
   if(!target){return}
   const t=target;
-  const dir=document.getElementById("dirBtn"); dir.hidden=false; dir.href=dirURL(t);
   document.getElementById("moreBtn").hidden=false;
   if(countFor!==t.id){countFor=t.id;moreLabel();loadPhotos(t).then(()=>{if(target===t)moreLabel()})}
   if(sheet.classList.contains("open")&&detailFor!==t.id) renderDetail(t);
-  dir.setAttribute("aria-label","Walking directions to "+t.name+" in Google Maps");
   sheet.classList.toggle("nofix",!me);
   if(!me){ // picked a tree before turning on location
     if(light) return;
@@ -394,13 +390,13 @@ function update(light){
   arrow.style.transform=`rotate(${rel}deg)`;
   document.getElementById("orbit").style.transform=`rotate(${rel}deg)`;
   {const dial=document.getElementById("dial"),di=document.getElementById("dialImg");
-   if(t.img){const src=IMG+encodeURIComponent(t.img);if(di.dataset.src!==src){di.dataset.src=src;di.src=src;di.onerror=()=>dial.classList.remove("photo")}dial.classList.add("photo")}
+   if(t.img){const src=IMG+encodeURIComponent(t.img);if(di.dataset.src!==src){di.dataset.src=src;di.src=src;dial.style.setProperty("--ph",`url("${src}")`);di.onerror=()=>dial.classList.remove("photo")}dial.classList.add("photo")}
    else dial.classList.remove("photo");}
   document.getElementById("cardinal").textContent = heading==null ? "N" : "";
   if(light) return;
   const [n,u]=fmt(d);
   const here = d <= Math.max(HERE_M, Math.min(me.acc,25));
-  document.getElementById("dist").innerHTML = here ? "Here" : `${n}<span>${u}</span>`;
+  document.getElementById("dist").innerHTML = here ? "" : `${n}<span>${u} away</span>`;
   document.getElementById("dial").classList.toggle("here",here);
   setText(t);
   document.getElementById("status").textContent = here ? "" :
