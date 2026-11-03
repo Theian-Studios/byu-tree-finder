@@ -6,12 +6,14 @@
 <meta name="theme-color" content="#002E5D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>BYU Tree Finder</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23002E5D'/%3E%3Cpath d='M16 5c4.4 0 8 3.4 8 7.7 0 3.9-3 7.1-6.8 7.6V27h-2.4v-6.7C11 19.8 8 16.6 8 12.7 8 8.4 11.6 5 16 5Z' fill='%237BBE72'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,700;1,7..72,400&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy:#002E5D; --leaf:#3E7D3A; --leaf-soft:#E3EFDF; --bark:#6B4F3A;
+  --navy:#002E5D; --leaf:#3E7D3A; --leaf-soft:#E3EFDF;
+  --btn:#002E5D; --btn-ink:#fff;
+  --shadow:0 1px 2px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);
   --paper:#FBFCF8; --ink:#1F2A33; --muted:#5E6B74; --line:#D9DED6;
   --me:#1A73E8; --near:#E8A33D;
   --serif:"Literata",Georgia,"Times New Roman",serif;
@@ -19,59 +21,63 @@
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
-  :root{--paper:#141A17;--ink:#E7ECE6;--muted:#9AA79F;--line:#2C3630;--leaf-soft:#22331F;--leaf:#7BBE72;--navy:#7FA9D6;color-scheme:dark}
+  :root{--paper:#141A17;--ink:#E7ECE6;--muted:#9AA79F;--line:#2C3630;--leaf-soft:#22331F;--leaf:#7BBE72;--navy:#7FA9D6;--btn:#2F6DB5;--btn-ink:#fff;--shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
-body{font-family:var(--sans);color:var(--ink);background:var(--paper);overflow:hidden;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden;-webkit-tap-highlight-color:transparent}
 #map{position:fixed!important;left:0;right:0;top:0;bottom:var(--mapB,130px);z-index:0}
-body{background:#dfe6dc}
 @media (prefers-color-scheme:dark){body{background:#242f3e}}
 .leaflet-container{background:#dfe6dc;font-family:var(--sans)}
 
 /* top bar */
 .top{position:fixed;left:0;right:0;top:0;z-index:500;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 0;display:flex;gap:8px;pointer-events:none}
 .top>*{pointer-events:auto}
-.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:0 14px;height:44px;box-shadow:0 2px 10px rgba(0,30,60,.15)}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:0 14px;height:44px;box-shadow:var(--shadow)}
 .search input{flex:1;border:0;background:transparent;font:500 16px var(--sans);color:var(--ink);outline:none;min-width:0}
 .search svg{flex:none;color:var(--muted)}
-.iconbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,30,60,.15);cursor:pointer}
-.iconbtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-@media (prefers-color-scheme:dark){.iconbtn.on{color:#0d1a26}}
-.iconbtn:focus-visible,.search:focus-within,button:focus-visible{outline:3px solid var(--near);outline-offset:2px}
-.results{position:fixed;z-index:600;left:12px;right:68px;top:calc(env(safe-area-inset-top,0px) + 60px);max-height:50vh;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 20px rgba(0,30,60,.2);display:none}
-.results button{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer}
+.iconbtn.on{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.search:focus-within{border-color:var(--navy)}
+.iconbtn:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.results{position:fixed;z-index:600;left:12px;right:68px;top:calc(env(safe-area-inset-top,0px) + 60px);max-height:50vh;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:none}
+.results button{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer}
 .results button:last-child{border-bottom:0}
-.results small{color:var(--muted);font-style:italic;font-family:var(--serif)}
+.results b{font:600 16px var(--serif)}
+.results i{display:block;font:italic 13px var(--serif);color:var(--muted)}
+.results .d{font:600 14px var(--sans);font-variant-numeric:tabular-nums;color:var(--muted)}
 
 /* bottom sheet */
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,30,60,.18);padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 14px);max-height:72vh;display:flex;flex-direction:column}
-.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 10px;border:0;padding:0;cursor:pointer}
-.compass{display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:center;cursor:pointer;border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit;width:100%}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -1px 0 var(--line),0 -2px 12px rgba(0,0,0,.08);padding:0 16px calc(env(safe-area-inset-bottom,0px) + 14px);max-height:72vh;display:flex;flex-direction:column}
+.grab{flex:none;width:100%;height:24px;margin:0 0 4px;border:0;padding:0;background:none;cursor:grab;touch-action:none;display:grid;place-items:center}
+.grab::before{content:"";width:36px;height:4px;border-radius:2px;background:var(--line)}
+.compass{flex:none;display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:center;cursor:pointer;border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit;width:100%}
 .dial{width:76px;height:76px;border-radius:50%;border:2px solid var(--line);position:relative;display:grid;place-items:center;transition:border-color .3s,background .3s}
 .dial svg{transition:transform .25s ease-out}
 .dial .card{position:absolute;top:3px;left:50%;transform:translateX(-50%);font:600 10px var(--sans);color:var(--muted)}
+#sheet.nofix .dial,#sheet.nofix .dist{display:none}
+#sheet.nofix .compass{grid-template-columns:1fr}
 .dial.here{border-color:var(--leaf);background:var(--leaf-soft)}
 .dist{font:700 34px/1 var(--serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .dist span{font:500 15px var(--sans);color:var(--muted);margin-left:4px}
 .tname{font:700 19px/1.2 var(--serif);margin-top:4px}
 .sci{font:italic 400 14px var(--serif);color:var(--muted)}
 .status{font-size:14px;color:var(--muted);margin-top:2px}
-.hereBadge{display:inline-block;margin-top:6px;font:600 13px var(--sans);color:#fff;background:var(--leaf);padding:3px 10px;border-radius:12px}
-@media (prefers-color-scheme:dark){.hereBadge{color:#0d1a0c}}
-.actions{display:flex;gap:8px;margin-top:12px}
-.btn{flex:1;height:42px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 15px var(--sans);cursor:pointer}
+.hereBadge{display:inline-block;margin-top:6px;font:600 13px var(--sans);color:#fff;background:#3E7D3A;padding:3px 10px;border-radius:12px}
+.actions{flex:none;display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
-.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
-@media (prefers-color-scheme:dark){.btn.primary{color:#0d1a26}}
+.btn.primary{background:var(--btn);border-color:var(--btn);color:var(--btn-ink)}
+.btn[aria-pressed=true]{background:var(--leaf-soft);border-color:var(--leaf);color:var(--ink)}
+.btn[aria-pressed=true]::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--me);margin-right:7px;vertical-align:1px}
 .more{overflow:auto;margin-top:12px;display:none;-webkit-overflow-scrolling:touch}
 .sheet.open .more{display:block}
 .near h3,.detail h3{font:600 13px var(--sans);color:var(--muted);margin:4px 0 6px}
 .rowwrap{display:flex;align-items:center;border-top:1px solid var(--line)}
 .rowwrap .row{border-top:0;flex:1;min-width:0}
-.go{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--navy);border-radius:50%}
-.go:focus-visible{outline:3px solid var(--near)}
+.go{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--muted);border-radius:50%}
 .row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;width:100%;padding:9px 0;border:0;border-top:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .row b{font:600 16px var(--serif)}
 .row i{display:block;font:italic 13px var(--serif);color:var(--muted)}
@@ -84,7 +90,7 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 @media (prefers-color-scheme:dark){.err{background:#3A2A12;color:#F5D7A8}}
 
 /* markers */
-.tmark{width:16px;height:16px;border-radius:50%;background:var(--leaf);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .2s}
+.tmark{width:16px;height:16px;border-radius:50%;background:var(--leaf);border:2.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);transition:transform .2s}
 .tmark.target{background:var(--near);transform:scale(1.45)}
 .tmark.dim{opacity:.35}
 .mewrap{position:relative;width:22px;height:22px}
@@ -110,8 +116,8 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
 </div>
 <div class="results" id="results" role="listbox"></div>
 
-<section class="sheet" id="sheet" aria-live="polite">
-  <button class="grab" id="grab" aria-label="Show more"></button>
+<section class="sheet nofix" id="sheet" aria-label="Tree details">
+  <button class="grab" id="grab" aria-label="Show more" aria-expanded="false"></button>
   <button class="compass" id="compass">
     <div class="dial" id="dial">
       <span class="card" id="cardinal"></span>
@@ -121,17 +127,18 @@ a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decora
       <div class="dist" id="dist">–</div>
       <div class="tname" id="tname">Find trees near you</div>
       <div class="sci" id="sci"></div>
-      <div class="status" id="status">Turn on location to see how close you are.</div>
+      <div class="status" id="status">Use your location to find the closest tree, or tap a dot on the map.</div>
       <div id="badge"></div>
     </div>
   </button>
   <div class="actions" id="actions">
     <button class="btn primary" id="locBtn">Use my location</button>
-    <button class="btn" id="followBtn" hidden>Follow me</button>
+    <button class="btn" id="followBtn" hidden aria-pressed="false">Follow me</button>
     <button class="btn" id="nearestBtn" hidden>Nearest</button>
     <a class="btn" id="dirBtn" hidden target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg>Directions</a>
   </div>
-  <div class="err" id="err"></div>
+  <div class="err" id="err" role="alert"></div>
+  <div class="sr" id="sr" aria-live="polite"></div>
   <div class="more" id="more">
     <div class="detail" id="detail"></div>
     <div class="near"><h3 id="nearTitle">All trees</h3><div id="list"></div></div>
@@ -170,6 +177,7 @@ function fmt(m){ // feet for a US campus
   if(ft<1000) return [Math.round(ft/5)*5 || Math.round(ft), "ft"];
   return [(m/1609.34).toFixed(2), "mi"];
 }
+const dec = s => {const x=document.createElement("textarea");x.innerHTML=String(s??"");return x.value};
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const dirURL = t => `https://www.google.com/maps/dir/?api=1&destination=${t.lat},${t.lng}&travelmode=walking`;
 
@@ -275,7 +283,7 @@ document.getElementById("layerBtn").onclick=e=>{satOn=!satOn;mv&&mv.sat(satOn);e
 
 /* ---------- data ---------- */
 let dataReady=false;
-function clean(list){return list.filter(t=>t.latitude>40&&t.latitude<41&&t.longitude<-111&&t.longitude>-112).map(t=>({id:t.id,name:t.commonName,sci:t.scientificName,lat:+t.latitude,lng:+t.longitude,type:t.treeTypeId}))}
+function clean(list){return list.filter(t=>t.latitude>40&&t.latitude<41&&t.longitude<-111&&t.longitude>-112).map(t=>({id:t.id,name:dec(t.commonName),sci:dec(t.scientificName),lat:+t.latitude,lng:+t.longitude,type:t.treeTypeId}))}
 async function load(){
   let tlist = SNAPSHOT.trees, tmap = SNAPSHOT.types;
   try{
@@ -283,7 +291,9 @@ async function load(){
     if(a&&Array.isArray(a.value)&&a.value.length) tlist=a.value;
     if(b&&Array.isArray(b.value)&&b.value.length){tmap={};b.value.forEach(t=>tmap[t.id]=t)}
   }catch(e){/* offline or blocked: use built-in copy */}
-  trees = clean(tlist); types = tmap; dataReady=true;
+  trees = clean(tlist); types = {};
+  for(const k in tmap){const y=tmap[k];types[k]={...y,family:dec(y.family),description:dec(y.description),cultivar:dec(y.cultivar)}}
+  dataReady=true;
   if(mv) wireMap();
   renderList();
 }
@@ -314,7 +324,7 @@ function onPos(p){
   update(); renderList();
 }
 function nearest(){let best=null,bd=Infinity;for(const t of trees){const d=dist(me,t);if(d<bd){bd=d;best=t}}return best}
-function setFollow(on){follow=on;const b=document.getElementById("followBtn");b.classList.toggle("primary",on);b.textContent=on?"Following":"Follow me";if(on&&me&&mv)mv.setView(me.lat,me.lng,18)}
+function setFollow(on){follow=on;const b=document.getElementById("followBtn");b.setAttribute("aria-pressed",on);b.textContent=on?"Following":"Follow me";if(on&&me&&mv)mv.setView(me.lat,me.lng,18)}
 document.getElementById("locBtn").onclick=startLocation;
 document.getElementById("followBtn").onclick=()=>setFollow(!follow);
 document.getElementById("nearestBtn").onclick=()=>{manualTarget=false;if(me){target=nearest();update();renderList();flyTo(target)}};
@@ -356,10 +366,10 @@ function update(light){
   const t=target;
   const dir=document.getElementById("dirBtn"); dir.hidden=false; dir.href=dirURL(t);
   dir.setAttribute("aria-label","Walking directions to "+t.name+" in Google Maps");
+  sheet.classList.toggle("nofix",!me);
   if(!me){ // picked a tree before turning on location
     if(light) return;
-    document.getElementById("dist").innerHTML="–";
-    setText(t);document.getElementById("status").textContent="Turn on location to see how far away it is.";
+    setText(t);document.getElementById("status").textContent="Use your location to see how far away it is.";
     return;
   }
   const d=dist(me,t), b=bearing(me,t);
@@ -373,12 +383,13 @@ function update(light){
   document.getElementById("dial").classList.toggle("here",here);
   setText(t);
   document.getElementById("status").textContent = here ? "" :
-    `${cardinal(b)} of you · GPS ±${Math.round(me.acc*3.28)} ft` ;
+    cardinal(b)+" of you"+(me.acc>15?" · weak GPS, distance may be off":"");
   document.getElementById("badge").innerHTML = here ? '<span class="hereBadge">You’re at this tree</span>' : "";
-  if(here && !arrived.has(t.id)){arrived.add(t.id); if(ARRIVE_BUZZ&&navigator.vibrate) navigator.vibrate([80,60,80])}
+  if(here && !arrived.has(t.id)){arrived.add(t.id); say("You’re at the "+t.name+"."); if(ARRIVE_BUZZ&&navigator.vibrate) navigator.vibrate([80,60,80])}
   restyleMarkers();
 }
-function setText(t){document.getElementById("tname").textContent=t.name;document.getElementById("sci").textContent=t.sci}
+let lastSaid="";function say(s){if(s===lastSaid)return;lastSaid=s;document.getElementById("sr").textContent=s}
+function setText(t){if(document.getElementById("tname").textContent!==t.name)say(t.name);document.getElementById("tname").textContent=t.name;document.getElementById("sci").textContent=t.sci}
 function choose(t,manual){
   target=t;manualTarget=manual;update();renderDetail(t);restyleMarkers();
   if(manual&&follow)setFollow(false);
@@ -409,8 +420,12 @@ document.getElementById("list").onclick=e=>{const b=e.target.closest(".row");if(
 
 /* sheet open/close */
 const sheet=document.getElementById("sheet");
-function toggleSheet(force){sheet.classList.toggle("open",force);sizeSheet()}
-document.getElementById("grab").onclick=()=>toggleSheet();
+function toggleSheet(force){const o=sheet.classList.toggle("open",force);document.getElementById("grab").setAttribute("aria-expanded",o);sizeSheet()}
+{const g=document.getElementById("grab");let y0=null,moved=false;
+ g.addEventListener("pointerdown",e=>{y0=e.clientY;moved=false;g.setPointerCapture(e.pointerId)});
+ g.addEventListener("pointermove",e=>{if(y0!=null&&!moved&&Math.abs(e.clientY-y0)>24){moved=true;toggleSheet(e.clientY<y0)}});
+ g.addEventListener("pointerup",()=>{y0=null});
+ g.addEventListener("click",()=>{if(!moved)toggleSheet();moved=false});}
 document.getElementById("compass").onclick=()=>{if(target&&!sheet.classList.contains("open"))renderDetail(target);toggleSheet()};
 function sizeSheet(){
   const h=sheet.offsetHeight, root=document.documentElement.style;
@@ -428,7 +443,7 @@ q.addEventListener("input",()=>{
   if(!s){res.style.display="none";return}
   let hits=trees.filter(t=>(t.name+" "+t.sci).toLowerCase().includes(s));
   if(me) hits.sort((a,b)=>dist(me,a)-dist(me,b));
-  res.innerHTML=hits.slice(0,20).map(t=>`<button data-id="${t.id}">${esc(t.name)} <small>${esc(t.sci)}</small>${me?` <span style="float:right;color:var(--muted)">${fmt(dist(me,t)).join(" ")}</span>`:""}</button>`).join("")||'<div style="padding:12px 14px;color:var(--muted)">No trees match that name.</div>';
+  res.innerHTML=hits.slice(0,20).map(t=>`<button data-id="${t.id}"><span><b>${esc(t.name)}</b><i>${esc(t.sci)}</i></span><span class="d">${me?fmt(dist(me,t)).join(" "):""}</span></button>`).join("")||'<div style="padding:12px 14px;color:var(--muted)">No trees match that name.</div>';
   res.style.display="block";
 });
 res.onclick=e=>{const b=e.target.closest("button");if(!b)return;const t=trees.find(x=>x.id==b.dataset.id);res.style.display="none";q.blur();choose(t,true);flyTo(t)};
