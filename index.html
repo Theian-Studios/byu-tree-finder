@@ -12,7 +12,7 @@
 <style>
 :root{
   --navy:#002E5D; --leaf:#3E7D3A; --leaf-soft:#E3EFDF;
-  --btn:#002E5D; --btn-ink:#fff;
+  --btn:#002E5D; --btn-ink:#fff; --gray-btn:#ECEEEB;
   --shadow:0 1px 2px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);
   --paper:#FBFCF8; --ink:#1F2A33; --muted:#5E6B74; --line:#D9DED6;
   --me:#1A73E8; --near:#E8A33D;
@@ -21,7 +21,7 @@
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
-  :root{--paper:#141A17;--ink:#E7ECE6;--muted:#9AA79F;--line:#2C3630;--leaf-soft:#22331F;--leaf:#7BBE72;--navy:#7FA9D6;--btn:#2F6DB5;--btn-ink:#fff;--shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);color-scheme:dark}
+  :root{--paper:#141A17;--ink:#E7ECE6;--muted:#9AA79F;--line:#2C3630;--leaf-soft:#22331F;--leaf:#7BBE72;--navy:#7FA9D6;--btn:#2F6DB5;--btn-ink:#fff;--gray-btn:#262C29;--shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -77,7 +77,7 @@ body{font-family:var(--sans);color:var(--ink);background:#dfe6dc;overflow:hidden
 .status:empty{display:none}
 .hereBadge{display:inline-block;margin-top:6px;font:600 13px var(--sans);color:#fff;background:#3E7D3A;padding:3px 10px;border-radius:12px}
 .actions{flex:none;display:flex;gap:8px;margin-top:12px}
-.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:12px;border:0;border-radius:10px;background:var(--leaf-soft);color:var(--ink);font:600 15px var(--sans);cursor:pointer}
+.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:12px;border:0;border-radius:10px;background:var(--gray-btn);color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 .morebtn svg{transition:transform .25s}.sheet.open .morebtn svg{transform:rotate(180deg)}
 .btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 15px var(--sans);cursor:pointer}
 a.btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
@@ -422,7 +422,7 @@ function renderDetail(t){
     <div class="meta">${esc(ty.family||"")}${ty.cultivar?" · cultivar "+esc(ty.cultivar):""}${plantedHere>1?` · ${plantedHere} on campus`:""}</div>
     <p>${esc(ty.description||"")}</p>
     <div class="strip" id="strip" aria-label="More photos"></div>
-    <p class="meta"><a href="${dirURL(t)}" target="_blank" rel="noopener">Walking directions in Google Maps</a></p>
+    <p class="meta"><a href="${dirURL(t)}" target="_blank" rel="noopener">Walking directions</a></p>
     <p class="meta"><a href="${SITE}/trees/${t.type}" target="_blank" rel="noopener">Care notes on BYU Tree Tours</a></p>`;
   loadPhotos(t);
 }
@@ -455,7 +455,7 @@ function renderList(){
     <svg width="24" height="24" viewBox="0 0 24 24" style="transform:rotate(${me?((t._b-(heading||0)+360)%360):0}deg)"><path d="${me?"M12 3 18 19 12 15 6 19Z":"M12 2c4 3 6 6 6 9a6 6 0 0 1-12 0c0-3 2-6 6-9Zm0 13v7"}" fill="${me?"currentColor":"none"}" stroke="currentColor" stroke-width="${me?0:2}"/></svg>
     <span><b>${esc(t.name)}</b><i>${esc(t.sci)}</i></span>
     <span class="d">${me?fmt(t._d).join(" "):""}</span></button>
-    <a class="go" href="${dirURL(t)}" target="_blank" rel="noopener" aria-label="Walking directions to ${esc(t.name)} in Google Maps" title="Directions"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg></a></div>`).join("");
+    <a class="go" href="${dirURL(t)}" target="_blank" rel="noopener" aria-label="Walking directions to ${esc(t.name)}" title="Directions"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12Z"/><path d="M9 14v-3h5m-2-2 2 2-2 2"/></svg></a></div>`).join("");
 }
 document.getElementById("list").onclick=e=>{const b=e.target.closest(".row");if(!b)return;const t=trees.find(x=>x.id==b.dataset.id);choose(t,true);flyTo(t)};
 
