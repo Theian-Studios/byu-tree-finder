@@ -437,7 +437,7 @@ async function loadPhotos(t){
 function renderList(){
   const list=document.getElementById("list");
   let arr=trees.slice();
-  if(me){arr.forEach(t=>{t._d=dist(me,t);t._b=bearing(me,t)});arr.sort((a,b)=>a._d-b._d);arr=arr.slice(0,15);document.getElementById("nearTitle").textContent="Closest to you"}
+  if(me){arr.forEach(t=>{t._d=dist(me,t);t._b=bearing(me,t)});arr.sort((a,b)=>a._d-b._d);arr=arr.slice(0,5);document.getElementById("nearTitle").textContent="Closest to you"}
   else arr.sort((a,b)=>a.name.localeCompare(b.name));
   list.innerHTML=arr.map(t=>`<div class="rowwrap"><button class="row" data-id="${t.id}">
     <svg width="24" height="24" viewBox="0 0 24 24" style="transform:rotate(${me?((t._b-(heading||0)+360)%360):0}deg)"><path d="${me?"M12 3 18 19 12 15 6 19Z":"M12 2c4 3 6 6 6 9a6 6 0 0 1-12 0c0-3 2-6 6-9Zm0 13v7"}" fill="${me?"currentColor":"none"}" stroke="currentColor" stroke-width="${me?0:2}"/></svg>
